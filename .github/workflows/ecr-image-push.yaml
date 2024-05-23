@@ -6,9 +6,6 @@ on:
     paths:
       - 'Dockerfile'
       - 'requirements.txt'
-    paths-ignore:
-      - 'demo-project/**'
-      - 'readme.md'
 
 jobs:
   build:
