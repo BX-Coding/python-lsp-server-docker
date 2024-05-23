@@ -15,3 +15,7 @@ The websocket url should be running at ws://localhost:8000
 
 In the demo-project subfolder, there is a simple react app that you can use to test the websocket URL of the container.
 To run the demo project, cd into the demo-project folder, install the dependencies with ``npm install`` then ```npm start``` to start the app. In App.js, change the const serverUri to the websocket uri which should be on port 8000.
+
+# Current status
+
+- All functionalties work except lint on button click
