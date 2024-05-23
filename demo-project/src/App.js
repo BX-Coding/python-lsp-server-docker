@@ -9,9 +9,13 @@ import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 
 function App() {
   const editor = useRef(null);
+  const viewRef = useRef(null);
+  const wsRef = useRef(null);
 
   useEffect(() => {
     const serverUri = "ws://localhost:8000";
+
+    wsRef.current = new WebSocket(serverUri);
 
     const ls = languageServer({
       serverUri,
@@ -36,15 +40,43 @@ function App() {
       parent: editor.current,
     });
 
+    viewRef.current = view;
+
     return () => {
       view.destroy();
+      wsRef.current.close();
     };
   }, []);
+
+  const lintCode = () => {
+    if (wsRef.current && viewRef.current) {
+      const code = viewRef.current.state.doc.toString();
+
+      const lintRequest = {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "textDocument/formatting",
+        params: {
+          textDocument: {
+            uri: "file:///index.js",
+            text: code,
+          },
+        },
+      };
+
+      // console.log("Lint request:", JSON.stringify(lintRequest));
+      wsRef.current.send(JSON.stringify(lintRequest));
+      wsRef.current.addEventListener("message", (event) => {
+        console.log("Lint response:", event.data);
+      });
+    }
+  };
 
   return (
     <div className="App">
       <h1>Python Code Editor</h1>
       <div ref={editor}></div>
+      <button onClick={lintCode}>Lint Code</button>
     </div>
   );
 }
