@@ -22,11 +22,11 @@ jobs:
             USER_NAME: ${{secrets.USER_NAME}}
       
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          echo "$PRIVATE_KEY" > private_key.pm && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
 
-              # Now we have got the access of EC2 and we will start the deploy .
               sudo docker stop $(sudo docker ps -aq) &&
+              sudo docker rm $(sudo docker ps -aq) &&
               cd py-lsp-server &&
               cd python-lsp-server-docker && 
               git pull origin main &&

@@ -1,3 +1,4 @@
+# pip install -r requirements.txt
 python-lsp-jsonrpc==1.1.2
 python-lsp-server==1.11.0
 python-lsp-server[websockets]
