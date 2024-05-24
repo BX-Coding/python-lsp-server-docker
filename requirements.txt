@@ -3,4 +3,4 @@ python-lsp-server==1.11.0
 python-lsp-server[websockets]
 python-lsp-server[all]
 python-lsp-ruff==2.2.1
-
+pygls==1.3.1
