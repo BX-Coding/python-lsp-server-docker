@@ -13,7 +13,7 @@ function App() {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const serverUri = "ws://localhost:8000";
+    const serverUri = "ws://ec2-3-135-217-9.us-east-2.compute.amazonaws.com:8000";
 
     wsRef.current = new WebSocket(serverUri);
 
