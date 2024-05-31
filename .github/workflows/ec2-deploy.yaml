@@ -19,8 +19,8 @@ jobs:
         name: Deploy over SSH
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ vars.SSH_HOST }}
-          REMOTE_USER: ${{ vars.USER_NAME }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.USER_NAME }}
           SCRIPT_AFTER: |
             sudo docker stop $(sudo docker ps -aq) 
             sudo docker rm $(sudo docker ps -aq) 
