@@ -1,6 +1,10 @@
 name: Rollout update on EC2 instance
 
 on:
+  workflow_run:
+    workflows: ["Docker Image CI"]
+    types: 
+      - completed
   push:
     branches:
       - main
