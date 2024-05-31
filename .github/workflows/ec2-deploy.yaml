@@ -1,12 +1,12 @@
-# name: Rollout update on EC2 instance
+name: Rollout update on EC2 instance
 
-# on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'Dockerfile'
-#       - 'requirements.txt'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - 'requirements.txt'
 
 # jobs:
 #   Deploy:
@@ -21,7 +21,7 @@
 #             HOSTNAME: ${{secrets.SSH_HOST}}
 #             USER_NAME: ${{secrets.USER_NAME}}
       
-#         run: |
+#         run: 
 #           echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
 #           ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER_NAME}@${HOSTNAME} '
 
@@ -31,5 +31,23 @@
 #               cd python-lsp-server-docker && 
 #               git pull origin main &&
 #               sudo docker build -t python-lsp-server . &&
-#               sudo docker run -p 8000:8000 python-lsp-server
+#               sudo docker run -p 8080:8080 python-lsp-server
 #               '
+
+jobs:
+
+  Deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+        - uses: easingthemes/ssh-deploy@v5.0.0
+          name: Deploy over SSH
+          with:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            REMOTE_HOST: ${{ vars.SSH_HOST }}
+            REMOTE_USER: ${{ vars.USER_NAME }}
+            SCRIPT_AFTER: |
+                ./script
+                // PUT THE COMMANDS HERE
