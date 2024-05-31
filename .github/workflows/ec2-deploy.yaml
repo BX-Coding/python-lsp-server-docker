@@ -1,13 +1,9 @@
-name: Rollout update on EC2 instance
+name: Deploy to EC2
 
 on:
   push:
     branches:
       - main
-    # paths:
-    #   - 'Dockerfile'
-    #   - 'requirements.txt'
-    #   - './'
 
 jobs:
   deploy:
@@ -17,32 +13,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    - name: Install SSH Client
+      run: sudo apt-get install -y openssh-client
 
-    - name: SSH into EC2
+    - name: Add SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        name: deploy_key
+        known_hosts: ${{ secrets.SSH_HOST }}
+
+    - name: Deploy to EC2
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        USER_NAME: ${{ secrets.USER_NAME }}
       run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          # Stop and remove all Docker containers
-          sudo docker stop \$(sudo docker ps -aq)
-          sudo docker rm \$(sudo docker ps -aq)
-          
-          # Navigate to the project directory
+        ssh -i deploy_key -o StrictHostKeyChecking=no $USER_NAME@$SSH_HOST << 'EOF'
+          sudo docker stop $(sudo docker ps -aq)
+          sudo docker rm $(sudo docker ps -aq)
           cd py-lsp-server/python-lsp-server-docker
-          
-          # Pull the latest changes from the main branch
           git pull origin main
-          
-          # Build the Docker image
           sudo docker build -t python-lsp-server .
-          
-          # Run the Docker container
-          sudo docker run -p 8080:8080 python-lsp-server
-          
-          echo "Successfully connected to EC2 instance and ran commands!"
-      
-
+          sudo docker run -p 8080:8080 -d python-lsp-server
+        EOF
