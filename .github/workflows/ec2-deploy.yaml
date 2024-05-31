@@ -10,29 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install SSH Client
-      run: sudo apt-get install -y openssh-client
-
-    - name: Add SSH key
-      uses: shimataro/ssh-key-action@v2
+    - name: SSH and run commands
+      uses: appleboy/ssh-action@v0.1.8
       with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.USER_NAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        name: deploy_key
-        known_hosts: ${{ secrets.SSH_HOST }}
-
-    - name: Deploy to EC2
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        USER_NAME: ${{ secrets.USER_NAME }}
-      run: |
-        ssh -i deploy_key -o StrictHostKeyChecking=no $USER_NAME@$SSH_HOST << 'EOF'
+        script: |
           sudo docker stop $(sudo docker ps -aq)
           sudo docker rm $(sudo docker ps -aq)
           cd py-lsp-server/python-lsp-server-docker
           git pull origin main
           sudo docker build -t python-lsp-server .
           sudo docker run -p 8080:8080 -d python-lsp-server
-        EOF
