@@ -8,6 +8,24 @@ on:
       - 'Dockerfile'
       - 'requirements.txt'
 
+jobs:
+
+  Deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+        - uses: easingthemes/ssh-deploy@v5.0.0
+          name: Deploy over SSH
+          with:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            REMOTE_HOST: ${{ vars.SSH_HOST }}
+            REMOTE_USER: ${{ vars.USER_NAME }}
+            SCRIPT_AFTER: |
+                ./script
+                // PUT THE COMMANDS HERE
+
 # jobs:
 #   Deploy:
 #     name: Deploy to EC2
@@ -34,20 +52,3 @@ on:
 #               sudo docker run -p 8080:8080 python-lsp-server
 #               '
 
-jobs:
-
-  Deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
-
-    steps:
-        - uses: easingthemes/ssh-deploy@v5.0.0
-          name: Deploy over SSH
-          with:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            REMOTE_HOST: ${{ vars.SSH_HOST }}
-            REMOTE_USER: ${{ vars.USER_NAME }}
-            SCRIPT_AFTER: |
-                ./script
-                // PUT THE COMMANDS HERE
