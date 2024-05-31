@@ -10,24 +10,39 @@ on:
     #   - './'
 
 jobs:
-
-  Deploy:
-    name: Deploy
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: easingthemes/ssh-deploy@v5.0.0
-        name: Deploy over SSH
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.USER_NAME }}
-          SCRIPT_AFTER: |
-            sudo docker stop $(sudo docker ps -aq) 
-            sudo docker rm $(sudo docker ps -aq) 
-            cd py-lsp-server 
-            cd python-lsp-server-docker 
-            git pull origin main 
-            sudo docker build -t python-lsp-server . 
-            sudo docker run -p 8080:8080 python-lsp-server
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: SSH into EC2
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          # Stop and remove all Docker containers
+          sudo docker stop \$(sudo docker ps -aq)
+          sudo docker rm \$(sudo docker ps -aq)
+          
+          # Navigate to the project directory
+          cd py-lsp-server/python-lsp-server-docker
+          
+          # Pull the latest changes from the main branch
+          git pull origin main
+          
+          # Build the Docker image
+          sudo docker build -t python-lsp-server .
+          
+          # Run the Docker container
+          sudo docker run -p 8080:8080 python-lsp-server
+          
+          echo "Successfully connected to EC2 instance and ran commands!"
+      
 
