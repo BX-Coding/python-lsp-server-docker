@@ -13,14 +13,14 @@ function App() {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const serverUri = "ws://ec2-3-135-217-9.us-east-2.compute.amazonaws.com:8000";
+    const serverUri = "ws://localhost:8030";
 
     wsRef.current = new WebSocket(serverUri);
 
     const ls = languageServer({
       serverUri,
-      rootUri: "file:///",
-      documentUri: "file:///index.js",
+      rootUri: "file:///index.py",
+      documentUri: "file:///index.py",
       languageId: "python",
     });
 
@@ -48,35 +48,63 @@ function App() {
     };
   }, []);
 
-  const lintCode = () => {
-    if (wsRef.current && viewRef.current) {
-      const code = viewRef.current.state.doc.toString();
-
-      const lintRequest = {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "textDocument/formatting",
-        params: {
-          textDocument: {
-            uri: "file:///index.js",
-            text: code,
-          },
-        },
-      };
-
-      // console.log("Lint request:", JSON.stringify(lintRequest));
-      wsRef.current.send(JSON.stringify(lintRequest));
-      wsRef.current.addEventListener("message", (event) => {
-        console.log("Lint response:", event.data);
-      });
+  const handleFormatCode = async () => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket is not open. Cannot send formatting request.");
+      return;
     }
+  
+    const editorView = viewRef.current;
+    const doc = editorView.state.doc.toString();
+  
+    const formatRequest = {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "textDocument/formatting",
+      params: {
+        textDocument: {
+          uri: "file:///index.py",
+        },
+        options: {
+          tabSize: 4,
+          insertSpaces: true,
+        },
+      },
+    };
+  
+    wsRef.current.send(JSON.stringify(formatRequest));
+  
+    wsRef.current.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      if (response.id === 1 && response.result) {
+        const formatted = response.result[0].newText;
+        editorView.dispatch({
+          changes: {
+            from: 0,
+            to: doc.length,
+            insert: formatted,
+          },
+        });
+      } else if (response.error) {
+        console.error("Error in formatting response:", response.error);
+      }
+    };
+  
+    wsRef.current.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  
+    wsRef.current.onclose = (event) => {
+      console.warn("WebSocket closed:", event);
+    };
   };
+  
 
   return (
     <div className="App">
       <h1>Python Code Editor</h1>
+      <button onClick={handleFormatCode}>Format Code</button>
       <div ref={editor}></div>
-      <button onClick={lintCode}>Lint Code</button>
     </div>
   );
 }
