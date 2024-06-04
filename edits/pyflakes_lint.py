@@ -20,7 +20,8 @@ PYFLAKES_ERROR_MESSAGES = (
     messages.TwoStarredExpressions,
 )
 
-CUSTOM_VALID_FUNCTIONS = {
+# List of common errors in Python for kids:    
+CUSTOM_VALID_FUNCTIONS = [
     "move",
     "goToXY",
     "goTo",
@@ -101,7 +102,45 @@ CUSTOM_VALID_FUNCTIONS = {
     "changePenSize",
     "setPenSize",
     "endThread"
-}
+]
+
+PYTHON_KEY_WORDS = [
+    "False",
+    "None",
+    "True",
+    "and",
+    "as",
+    "assert",
+    "async",
+    "await",
+    "break",
+    "class",
+    "continue",
+    "def",
+    "del",
+    "elif",
+    "else",
+    "except",
+    "finally",
+    "for",
+    "from",
+    "global",
+    "if",
+    "import",
+    "in",
+    "is",
+    "lambda",
+    "nonlocal",
+    "not",
+    "or",
+    "pass",
+    "raise",
+    "return",
+    "try",
+    "while",
+    "with",
+    "yield"
+]
 
 @hookimpl
 def pylsp_lint(workspace, document):
@@ -173,11 +212,47 @@ class PyflakesDiagnosticReport:
         if isinstance(message, messages.UndefinedName) and message.message_args[0] in CUSTOM_VALID_FUNCTIONS:
             return  # Do not report this as an error or warning
 
+
+        def almost_equal(a, b):
+            if (len(a) == len(b)):
+                count = 0
+                for x, y in zip(a, b):
+                    count += x != y
+                    if count == 2:
+                        return False
+                return True
+            if abs(len(a) - len(b)) > 1: return False
+            if len(a) < len(b):
+                a, b = b, a
+            it1 = iter(a)
+            it2 = iter(b)
+            count_diffs = 0
+            c1 = next(it1, None)
+            c2 = next(it2, None)
+            while True:
+                if c1 != c2:
+                    if count_diffs: return False
+                    count_diffs = 1
+                    c1 = next(it1)
+                else:
+                    try:
+                        c1 = next(it1)
+                        c2 = next(it2)
+                    except StopIteration: return True
+        
+        msg = message.message % message.message_args
+        if (message_type == messages.UndefinedName):
+            for m in CUSTOM_VALID_FUNCTIONS + PYTHON_KEY_WORDS:
+                if (m.upper() == message.message_args[0].upper() or almost_equal(m, message.message_args[0])):
+                    msg = "Did you mean \"" + m + "\" instead of \"" + message.message_args[0] + "\"?"
+                    break
+        elif (message.message_args[0] == "steps") :
+            msg = "hi there!"
         self.diagnostics.append(
             {
                 "source": "pyflakes",
                 "range": err_range,
-                "message": message.message % message.message_args,
+                "message": msg,
                 "severity": severity,
             }
         )
