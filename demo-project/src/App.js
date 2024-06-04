@@ -13,15 +13,21 @@ function App() {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const serverUri = "ws://localhost:8030";
+    const serverUri = "ws://localhost:8080";
 
     wsRef.current = new WebSocket(serverUri);
 
     const ls = languageServer({
       serverUri,
-      rootUri: "file:///index.py",
-      documentUri: "file:///index.py",
+      rootUri: "file:///home/",
+      documentUri: "file:///home/index.py",
       languageId: "python",
+      workspaceFolders: [
+        {
+          uri: "file:///home/",
+          name: "root",
+        },
+      ],
     });
 
     const startState = EditorState.create({
@@ -53,17 +59,17 @@ function App() {
       console.error("WebSocket is not open. Cannot send formatting request.");
       return;
     }
-  
+
     const editorView = viewRef.current;
     const doc = editorView.state.doc.toString();
-  
+
     const formatRequest = {
       jsonrpc: "2.0",
       id: 1,
       method: "textDocument/formatting",
       params: {
         textDocument: {
-          uri: "file:///index.py",
+          uri: "file:///home/index.py",
         },
         options: {
           tabSize: 4,
@@ -71,9 +77,9 @@ function App() {
         },
       },
     };
-  
+
     wsRef.current.send(JSON.stringify(formatRequest));
-  
+
     wsRef.current.onmessage = (event) => {
       const response = JSON.parse(event.data);
       if (response.id === 1 && response.result) {
@@ -89,16 +95,15 @@ function App() {
         console.error("Error in formatting response:", response.error);
       }
     };
-  
+
     wsRef.current.onerror = (error) => {
       console.error("WebSocket error:", error);
     };
-  
+
     wsRef.current.onclose = (event) => {
       console.warn("WebSocket closed:", event);
     };
   };
-  
 
   return (
     <div className="App">

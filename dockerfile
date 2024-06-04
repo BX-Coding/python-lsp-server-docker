@@ -22,4 +22,4 @@ WORKDIR /usr/local/lib/python3.11/site-packages/pylsp_ruff
 EXPOSE 8080
 
 # Command to run the Python LSP server with WebSocket support on port 8000
-CMD ["pylsp", "--ws", "--port", "8080"]
+CMD ["pylsp", "--ws", "-vv","--port", "8080"]

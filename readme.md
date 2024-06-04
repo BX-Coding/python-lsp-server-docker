@@ -6,15 +6,15 @@ python-lsp-server can be found here : https://github.com/python-lsp/python-lsp-s
 
 # Running LSP server container
 
-1. Build the container with docker build -t python-lsp-server .
-2. Start the container with docker run -p 8000:8000 python-lsp-server
+1. Build the container with `docker build -t python-lsp-server .`
+2. Start the container with `docker run -p 8080:8080 python-lsp-server`
 
-The websocket url should be running at ws://localhost:8000
+The websocket url should be running at ws://localhost:8080
 
 # Demo project
 
 In the demo-project subfolder, there is a simple react app that you can use to test the websocket URL of the container.
-To run the demo project, cd into the demo-project folder, install the dependencies with ``npm install`` then ```npm start``` to start the app. In App.js, change the const serverUri to the websocket uri which should be on port 8000.
+To run the demo project, cd into the demo-project folder, install the dependencies with `npm install` then `npm start` to start the app. In App.js, change the const serverUri to the websocket uri which should be on port 8080.
 
 # Current status
 
