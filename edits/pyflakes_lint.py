@@ -213,7 +213,7 @@ class PyflakesDiagnosticReport:
                         c2 = next(it2)
                     except StopIteration: return True
         
-        msg = message.message % message.message_args
+        msg = ""
         # for m in PYTHON_KEY_WORDS:
         #     msg += str(m)
         errorName = message.message_args[0]
@@ -236,19 +236,19 @@ class PyflakesDiagnosticReport:
             checkSet = funs if isFun else vars
             if (checkSet.count(errorName) <= 1):
                 instructStr = "defining" if isFun else "assigning a value to"
-                msg += ". Try " + instructStr + " \'" + errorName + "\' before using it."
+                msg += "Try " + instructStr + " \'" + errorName + "\' before using it. "
             namesSet = set(checkSet).difference(set(CUSTOM_VALID_FUNCTIONS))
             namesSet.discard(errorName)
 
             #First check for misspelled builtin words
             for m in (CUSTOM_VALID_FUNCTIONS + PYTHON_FUNCTIONS if isFun else PYTHON_KEY_WORDS):
                 if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
-                    msg += " Did you mean \'" + m + "\' instead of \'" + errorName + "\'?"
+                    msg += "Did you mean \'" + m + "\' instead of \'" + errorName + "\'? "
                     break
             #Then check if misspelled name
             for m in namesSet:
                 if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
-                    msg += " Did you mean \'" + m + "\' instead of \'" + errorName + "\'?"
+                    msg += "Did you mean \'" + m + "\' instead of \'" + errorName + "\'? "
                     break
 
         self.diagnostics.append(
