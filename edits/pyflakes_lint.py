@@ -1,10 +1,15 @@
 # Copyright 2017-2020 Palantir Technologies, Inc.
 # Copyright 2021- Python Language Server Contributors.
 
+import builtins
+import types
 from pyflakes import api as pyflakes_api
 from pyflakes import messages
 
 from pylsp import hookimpl, lsp
+
+# for variable parsing
+import ast
 
 # Pyflakes messages that should be reported as Errors instead of Warns
 PYFLAKES_ERROR_MESSAGES = (
@@ -104,43 +109,10 @@ CUSTOM_VALID_FUNCTIONS = [
     "endThread"
 ]
 
-PYTHON_KEY_WORDS = [
-    "False",
-    "None",
-    "True",
-    "and",
-    "as",
-    "assert",
-    "async",
-    "await",
-    "break",
-    "class",
-    "continue",
-    "def",
-    "del",
-    "elif",
-    "else",
-    "except",
-    "finally",
-    "for",
-    "from",
-    "global",
-    "if",
-    "import",
-    "in",
-    "is",
-    "lambda",
-    "nonlocal",
-    "not",
-    "or",
-    "pass",
-    "raise",
-    "return",
-    "try",
-    "while",
-    "with",
-    "yield"
-]
+PYTHON_KEY_WORDS = [name for name, obj in vars(builtins).items() 
+                          if not isinstance(obj, types.BuiltinFunctionType)]
+PYTHON_FUNCTIONS =  [name for name, obj in vars(builtins).items() 
+                          if isinstance(obj, types.BuiltinFunctionType)]
 
 @hookimpl
 def pylsp_lint(workspace, document):
@@ -156,6 +128,7 @@ class PyflakesDiagnosticReport:
     def __init__(self, lines):
         self.lines = lines
         self.diagnostics = []
+        self.source = '\n'.join([str(item) for item in lines])
 
     def unexpectedError(self, _filename, msg):  # pragma: no cover
         err_range = {
@@ -209,10 +182,10 @@ class PyflakesDiagnosticReport:
                 break
 
         # Check for custom valid functions
-        if isinstance(message, messages.UndefinedName) and message.message_args[0] in CUSTOM_VALID_FUNCTIONS:
-            return  # Do not report this as an error or warning
+        # if isinstance(message_type, messages.UndefinedName) and message.message_args[0] in CUSTOM_VALID_FUNCTIONS:
+        #     return  # Do not report this as an error or warning
 
-
+        #determines if two strings are one off
         def almost_equal(a, b):
             if (len(a) == len(b)):
                 count = 0
@@ -241,13 +214,43 @@ class PyflakesDiagnosticReport:
                     except StopIteration: return True
         
         msg = message.message % message.message_args
+        # for m in PYTHON_KEY_WORDS:
+        #     msg += str(m)
+        errorName = message.message_args[0]
         if (message_type == messages.UndefinedName):
-            for m in CUSTOM_VALID_FUNCTIONS + PYTHON_KEY_WORDS:
-                if (m.upper() == message.message_args[0].upper() or almost_equal(m, message.message_args[0])):
-                    msg = "Did you mean \"" + m + "\" instead of \"" + message.message_args[0] + "\"?"
+
+            if (errorName in set(CUSTOM_VALID_FUNCTIONS)):
+                return
+            isFun = False
+            locOfParen = self.lines[message.lineno - 1].find(errorName) + len(errorName)
+            if (locOfParen < len(self.lines[message.lineno - 1]) and self.lines[message.lineno - 1][locOfParen] == "("):
+                isFun = True
+
+            #Now parse the syntax tree to get all custom variable/function names
+            root = ast.parse(self.source)
+            funs = list({node.value.func.id: None for node in ast.walk(root) if isinstance(node, ast.Expr)})
+            vars = list({node.id: None for node in ast.walk(root) if isinstance(node, ast.Name)})
+            vars = [i for i in vars if not i in set(funs)]
+
+            #Then check if unassigned/undefined
+            checkSet = funs if isFun else vars
+            if (checkSet.count(errorName) <= 1):
+                instructStr = "defining" if isFun else "assigning a value to"
+                msg += ". Try " + instructStr + " \'" + errorName + "\' before using it."
+            namesSet = set(checkSet).difference(set(CUSTOM_VALID_FUNCTIONS))
+            namesSet.discard(errorName)
+
+            #First check for misspelled builtin words
+            for m in (CUSTOM_VALID_FUNCTIONS + PYTHON_FUNCTIONS if isFun else PYTHON_KEY_WORDS):
+                if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
+                    msg += " Did you mean \'" + m + "\' instead of \'" + errorName + "\'?"
                     break
-        elif (message.message_args[0] == "steps") :
-            msg = "hi there!"
+            #Then check if misspelled name
+            for m in namesSet:
+                if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
+                    msg += " Did you mean \'" + m + "\' instead of \'" + errorName + "\'?"
+                    break
+
         self.diagnostics.append(
             {
                 "source": "pyflakes",
