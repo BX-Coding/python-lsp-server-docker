@@ -46,6 +46,7 @@ NOQA_REGEX = re.compile(
     r"(?::\s?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?"
 )
 
+#list of valid Patch functions to ignore
 CUSTOM_VALID_FUNCTIONS = [
     "move",
     "goToXY",
@@ -259,16 +260,17 @@ def pylsp_lint(workspace: Workspace, document: Document) -> List[Dict]:
     """
     settings = load_settings(workspace, document.path)
     checks = run_ruff_check(document=document, settings=settings)
+    # Only get diagnostics for valid errors, not Patch function errors
     diagnostics = []
     for c in checks:
         isError = True
+        #Checks if a naming error
         if (c.code == "F821"):
             for n in CUSTOM_VALID_FUNCTIONS:
                 if n in c.message:
                     isError = False
         if isError:
             diagnostics.append(create_diagnostic(check=c, settings=settings))
-    # diagnostics = [create_diagnostic(check=c, settings=settings) for c in checks]
     return converter.unstructure(diagnostics)
 
 

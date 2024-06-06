@@ -15,9 +15,6 @@ COPY edits/jedi_completion.py /usr/local/lib/python3.11/site-packages/pylsp/plug
 COPY edits/pyflakes_lint.py /usr/local/lib/python3.11/site-packages/pylsp/plugins/pyflakes_lint.py
 COPY edits/plugin.py /usr/local/lib/python3.11/site-packages/pylsp_ruff/plugin.py
 
-# Set the working directory to the pylsp_ruff package folder
-# WORKDIR /usr/local/lib/python3.11/site-packages/pylsp_p
-
 # Expose port 8000 for WebSocket
 EXPOSE 8080
 

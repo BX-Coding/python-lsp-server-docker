@@ -25,7 +25,7 @@ PYFLAKES_ERROR_MESSAGES = (
     messages.TwoStarredExpressions,
 )
 
-# List of common errors in Python for kids:    
+# List of Patch functions  
 CUSTOM_VALID_FUNCTIONS = [
     "move",
     "goToXY",
@@ -109,6 +109,8 @@ CUSTOM_VALID_FUNCTIONS = [
     "endThread"
 ]
 
+
+# Gets all Python key words and functions
 PYTHON_KEY_WORDS = [name for name, obj in vars(builtins).items() 
                           if not isinstance(obj, types.BuiltinFunctionType)]
 PYTHON_FUNCTIONS =  [name for name, obj in vars(builtins).items() 
@@ -181,11 +183,8 @@ class PyflakesDiagnosticReport:
                 severity = lsp.DiagnosticSeverity.Error
                 break
 
-        # Check for custom valid functions
-        # if isinstance(message_type, messages.UndefinedName) and message.message_args[0] in CUSTOM_VALID_FUNCTIONS:
-        #     return  # Do not report this as an error or warning
-
-        #determines if two strings are one off
+        # determines if two strings (a and b) are one off
+        # Comes from here: https://stackoverflow.com/a/28665369
         def almost_equal(a, b):
             if (len(a) == len(b)):
                 count = 0
@@ -213,20 +212,23 @@ class PyflakesDiagnosticReport:
                         c2 = next(it2)
                     except StopIteration: return True
         
+
+
+        #Gets rid of error message because ruff provides default Python message.
         msg = ""
-        # for m in PYTHON_KEY_WORDS:
-        #     msg += str(m)
         errorName = message.message_args[0]
         if (message_type == messages.UndefinedName):
-
+            #First we determine if the error is a valid custom funcion in which case we throw no error
             if (errorName in set(CUSTOM_VALID_FUNCTIONS)):
                 return
+            
+            #Now determine if the error happens at a function (by parsing for parentheses)
             isFun = False
             locOfParen = self.lines[message.lineno - 1].find(errorName) + len(errorName)
             if (locOfParen < len(self.lines[message.lineno - 1]) and self.lines[message.lineno - 1][locOfParen] == "("):
                 isFun = True
 
-            #Now parse the syntax tree to get all custom variable/function names
+            #Now parse the syntax tree to get all customly defined variable/function names in the source code
             root = ast.parse(self.source)
             funs = list({node.value.func.id: None for node in ast.walk(root) if isinstance(node, ast.Expr)})
             vars = list({node.id: None for node in ast.walk(root) if isinstance(node, ast.Name)})
@@ -245,6 +247,7 @@ class PyflakesDiagnosticReport:
                 if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
                     msg += "Did you mean \'" + m + "\' instead of \'" + errorName + "\'? "
                     break
+
             #Then check if misspelled name
             for m in namesSet:
                 if (m.upper() == errorName.upper() or almost_equal(m, errorName)):
