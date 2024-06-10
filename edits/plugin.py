@@ -46,6 +46,90 @@ NOQA_REGEX = re.compile(
     r"(?::\s?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?"
 )
 
+#list of valid Patch functions to ignore
+CUSTOM_VALID_FUNCTIONS = [
+    "move",
+    "goToXY",
+    "goTo",
+    "turnRight",
+    "turnLeft",
+    "pointInDirection",
+    "pointTowards",
+    "glide",
+    "glideTo",
+    "ifOnEdgeBounce",
+    "setRotationStyle",
+    "changeX",
+    "setX",
+    "changeY",
+    "setY",
+    "getX",
+    "getY",
+    "getDirection",
+    "say",
+    "sayFor",
+    "think",
+    "thinkFor",
+    "show",
+    "hide",
+    "setCostumeTo",
+    "setBackdropTo",
+    "setBackdropToAndWait",
+    "nextCostume",
+    "nextBackdrop",
+    "changeGraphicEffectBy",
+    "setGraphicEffectTo",
+    "clearGraphicEffects",
+    "changeSizeBy",
+    "setSizeTo",
+    "setLayerTo",
+    "changeLayerBy",
+    "getSize",
+    "getCostume",
+    "getBackdrop",
+    "playSound",
+    "playSoundUntilDone",
+    "stopAllSounds",
+    "setSoundEffectTo",
+    "changeSoundEffectBy",
+    "clearSoundEffects",
+    "setVolumeTo",
+    "changeVolumeBy",
+    "getVolume",
+    "broadcast",
+    "broadcastAndWait",
+    "isTouching",
+    "isTouchingColor",
+    "isColorTouchingColor",
+    "distanceTo",
+    "getTimer",
+    "resetTimer",
+    "getAttributeOf",
+    "getMouseX",
+    "getMouseY",
+    "isMouseDown",
+    "isKeyPressed",
+    "current",
+    "daysSince2000",
+    "getLoudness",
+    "getUsername",
+    "ask",
+    "wait",
+    "stop",
+    "createClone",
+    "deleteClone",
+    "erasePen",
+    "stampPen",
+    "penDown",
+    "penUp",
+    "setPenColor",
+    "changePenEffect",
+    "setPenEffect",
+    "changePenSize",
+    "setPenSize",
+    "endThread"
+]
+
 
 UNNECESSITY_CODES = {
     "F401",  # `module` imported but unused
@@ -176,7 +260,17 @@ def pylsp_lint(workspace: Workspace, document: Document) -> List[Dict]:
     """
     settings = load_settings(workspace, document.path)
     checks = run_ruff_check(document=document, settings=settings)
-    diagnostics = [create_diagnostic(check=c, settings=settings) for c in checks]
+    # Only get diagnostics for valid errors, not Patch function errors
+    diagnostics = []
+    for c in checks:
+        isError = True
+        #Checks if a naming error
+        if (c.code == "F821"):
+            for n in CUSTOM_VALID_FUNCTIONS:
+                if n in c.message:
+                    isError = False
+        if isError:
+            diagnostics.append(create_diagnostic(check=c, settings=settings))
     return converter.unstructure(diagnostics)
 
 
@@ -230,6 +324,7 @@ def create_diagnostic(check: RuffCheck, settings: PluginSettings) -> Diagnostic:
     tags = []
     if check.code in UNNECESSITY_CODES:
         tags = [DiagnosticTag.Unnecessary]
+
 
     return Diagnostic(
         source=DIAGNOSTIC_SOURCE,
