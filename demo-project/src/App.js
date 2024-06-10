@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EditorView } from "codemirror";
 import { EditorState } from "@codemirror/state";
-import { languageServer } from "codemirror-languageserver";
+import {
+  languageServer,
+  LanguageServerClient,
+} from "codemirror-languageserver";
 import { basicSetup } from "codemirror";
 import { python } from "@codemirror/lang-python";
 import { lintGutter } from "@codemirror/lint";
@@ -10,24 +13,23 @@ import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 function App() {
   const editor = useRef(null);
   const viewRef = useRef(null);
-  const wsRef = useRef(null);
+
+  const serverUri = "ws://localhost:8080";
+  const rootUri = "file:///home/";
+  const documentUri = `${rootUri}index.py`;
 
   useEffect(() => {
-    const serverUri = "ws://localhost:8080";
-
-    wsRef.current = new WebSocket(serverUri);
+    // const newClient = new LanguageServerClient({
+    //   serverUri,
+    //   rootUri,
+    // });
 
     const ls = languageServer({
       serverUri,
-      rootUri: "file:///home/",
-      documentUri: "file:///home/index.py",
+      rootUri,
+      // client: newClient,
+      documentUri,
       languageId: "python",
-      workspaceFolders: [
-        {
-          uri: "file:///home/",
-          name: "root",
-        },
-      ],
     });
 
     const startState = EditorState.create({
@@ -50,16 +52,10 @@ function App() {
 
     return () => {
       view.destroy();
-      wsRef.current.close();
     };
   }, []);
 
   const handleFormatCode = async () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket is not open. Cannot send formatting request.");
-      return;
-    }
-
     const editorView = viewRef.current;
     const doc = editorView.state.doc.toString();
 
@@ -78,31 +74,17 @@ function App() {
       },
     };
 
-    wsRef.current.send(JSON.stringify(formatRequest));
-
-    wsRef.current.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      if (response.id === 1 && response.result) {
-        const formatted = response.result[0].newText;
-        editorView.dispatch({
-          changes: {
-            from: 0,
-            to: doc.length,
-            insert: formatted,
-          },
-        });
-      } else if (response.error) {
-        console.error("Error in formatting response:", response.error);
-      }
-    };
-
-    wsRef.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    wsRef.current.onclose = (event) => {
-      console.warn("WebSocket closed:", event);
-    };
+    // const response = await lsClient.textDocumentFormat(formatRequest);
+    // if (response.id === 1 && response.result) {
+    //   const formatted = response.result[0].newText;
+    //   editorView.dispatch({
+    //     changes: {
+    //       from: 0,
+    //       to: doc.length,
+    //       insert: formatted,
+    //     },
+    //   });
+    // }
   };
 
   return (
