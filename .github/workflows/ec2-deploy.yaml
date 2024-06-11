@@ -5,8 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'Dockerfile'
+      - 'dockerfile'
       - 'requirements.txt'
+      - 'edits/**'
     
 
 jobs:
