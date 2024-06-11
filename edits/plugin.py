@@ -200,7 +200,6 @@ def pylsp_format_document(workspace: Workspace, document: Document) -> Generator
         Document to apply ruff on.
 
     """
-    log.debug(f"textDocument/formatting: {document}")
     outcome = yield
     result = outcome.get_result()
     if result:
