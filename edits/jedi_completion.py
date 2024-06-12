@@ -39,7 +39,7 @@ patchApi = [
         "name": "move",
         "opcode": "motion_movesteps",
         "parameters": ["steps"],
-        "exampleParameters": {"steps": "PrimProxy.DEFAULT_STEPS"},
+        "exampleParameters": {"steps": 10},
     },
     {
         "name": "goToXY",
