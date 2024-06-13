@@ -18,7 +18,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: SSH and run commands
+    - name: SSH into instance one and run commands
       uses: appleboy/ssh-action@v0.1.8
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -31,3 +31,18 @@ jobs:
           git pull origin main
           sudo docker build -t python-lsp-server .
           sudo docker run -p 8080:8080 -d python-lsp-server
+
+    - name: SSH into instance two  and run commands
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.SSH_HOST_2 }}
+        username: ${{ secrets.USER_NAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sudo docker stop $(sudo docker ps -aq)
+          sudo docker rm $(sudo docker ps -aq)
+          cd py-lsp-server/python-lsp-server-docker
+          git pull origin main
+          sudo docker build -t python-lsp-server .
+          sudo docker run -p 8080:8080 -d python-lsp-server
+
