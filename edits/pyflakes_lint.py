@@ -35,10 +35,34 @@ PYTHON_KEY_WORDS = [name for name, obj in vars(builtins).items()
 PYTHON_FUNCTIONS =  [name for name, obj in vars(builtins).items() 
                           if isinstance(obj, types.BuiltinFunctionType)]
 
+def addStateValidations(list,document):
+    try:
+        targets = document._config.settings().get("targets")
+        backdrops = document._config.settings().get("backdrops")
+        costumes = document._config.settings().get("costumes")
+        sounds = document._config.settings().get("sounds")
+        messages = document._config.settings().get("messages")
+        for t in targets:
+            list.append(t)
+        for b in backdrops:
+            list.append(b)
+        for c in costumes:
+            list.append(c)
+        for s in sounds:
+            list.append(s)
+        for m in messages:
+            list.append(m)
+    except:
+        print("State not initialized")
+
 @hookimpl
 def pylsp_lint(workspace, document):
-    for func in document._config.settings().get("apiData"):
-        CUSTOM_VALID_FUNCTIONS.append(func)
+    try:
+        for func in document._config.settings().get("apiData"):
+            CUSTOM_VALID_FUNCTIONS.append(func)
+    except:
+        print("Api Data not yet loaded")
+    addStateValidations(CUSTOM_VALID_FUNCTIONS,document)
     with workspace.report_progress("lint: pyflakes"):
         reporter = PyflakesDiagnosticReport(document.lines)
         pyflakes_api.check(
