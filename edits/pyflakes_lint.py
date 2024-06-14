@@ -26,88 +26,7 @@ PYFLAKES_ERROR_MESSAGES = (
 )
 
 # List of Patch functions  
-CUSTOM_VALID_FUNCTIONS = [
-    "move",
-    "goToXY",
-    "goTo",
-    "turnRight",
-    "turnLeft",
-    "pointInDirection",
-    "pointTowards",
-    "glide",
-    "glideTo",
-    "ifOnEdgeBounce",
-    "setRotationStyle",
-    "changeX",
-    "setX",
-    "changeY",
-    "setY",
-    "getX",
-    "getY",
-    "getDirection",
-    "say",
-    "sayFor",
-    "think",
-    "thinkFor",
-    "show",
-    "hide",
-    "setCostumeTo",
-    "setBackdropTo",
-    "setBackdropToAndWait",
-    "nextCostume",
-    "nextBackdrop",
-    "changeGraphicEffectBy",
-    "setGraphicEffectTo",
-    "clearGraphicEffects",
-    "changeSizeBy",
-    "setSizeTo",
-    "setLayerTo",
-    "changeLayerBy",
-    "getSize",
-    "getCostume",
-    "getBackdrop",
-    "playSound",
-    "playSoundUntilDone",
-    "stopAllSounds",
-    "setSoundEffectTo",
-    "changeSoundEffectBy",
-    "clearSoundEffects",
-    "setVolumeTo",
-    "changeVolumeBy",
-    "getVolume",
-    "broadcast",
-    "broadcastAndWait",
-    "isTouching",
-    "isTouchingColor",
-    "isColorTouchingColor",
-    "distanceTo",
-    "getTimer",
-    "resetTimer",
-    "getAttributeOf",
-    "getMouseX",
-    "getMouseY",
-    "isMouseDown",
-    "isKeyPressed",
-    "current",
-    "daysSince2000",
-    "getLoudness",
-    "getUsername",
-    "ask",
-    "wait",
-    "stop",
-    "createClone",
-    "deleteClone",
-    "erasePen",
-    "stampPen",
-    "penDown",
-    "penUp",
-    "setPenColor",
-    "changePenEffect",
-    "setPenEffect",
-    "changePenSize",
-    "setPenSize",
-    "endThread"
-]
+CUSTOM_VALID_FUNCTIONS = []
 
 
 # Gets all Python key words and functions
@@ -118,6 +37,8 @@ PYTHON_FUNCTIONS =  [name for name, obj in vars(builtins).items()
 
 @hookimpl
 def pylsp_lint(workspace, document):
+    for func in document._config.settings().get("apiData"):
+        CUSTOM_VALID_FUNCTIONS.append(func)
     with workspace.report_progress("lint: pyflakes"):
         reporter = PyflakesDiagnosticReport(document.lines)
         pyflakes_api.check(

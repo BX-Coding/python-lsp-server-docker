@@ -47,88 +47,7 @@ NOQA_REGEX = re.compile(
 )
 
 #list of valid Patch functions to ignore
-CUSTOM_VALID_FUNCTIONS = [
-    "move",
-    "goToXY",
-    "goTo",
-    "turnRight",
-    "turnLeft",
-    "pointInDirection",
-    "pointTowards",
-    "glide",
-    "glideTo",
-    "ifOnEdgeBounce",
-    "setRotationStyle",
-    "changeX",
-    "setX",
-    "changeY",
-    "setY",
-    "getX",
-    "getY",
-    "getDirection",
-    "say",
-    "sayFor",
-    "think",
-    "thinkFor",
-    "show",
-    "hide",
-    "setCostumeTo",
-    "setBackdropTo",
-    "setBackdropToAndWait",
-    "nextCostume",
-    "nextBackdrop",
-    "changeGraphicEffectBy",
-    "setGraphicEffectTo",
-    "clearGraphicEffects",
-    "changeSizeBy",
-    "setSizeTo",
-    "setLayerTo",
-    "changeLayerBy",
-    "getSize",
-    "getCostume",
-    "getBackdrop",
-    "playSound",
-    "playSoundUntilDone",
-    "stopAllSounds",
-    "setSoundEffectTo",
-    "changeSoundEffectBy",
-    "clearSoundEffects",
-    "setVolumeTo",
-    "changeVolumeBy",
-    "getVolume",
-    "broadcast",
-    "broadcastAndWait",
-    "isTouching",
-    "isTouchingColor",
-    "isColorTouchingColor",
-    "distanceTo",
-    "getTimer",
-    "resetTimer",
-    "getAttributeOf",
-    "getMouseX",
-    "getMouseY",
-    "isMouseDown",
-    "isKeyPressed",
-    "current",
-    "daysSince2000",
-    "getLoudness",
-    "getUsername",
-    "ask",
-    "wait",
-    "stop",
-    "createClone",
-    "deleteClone",
-    "erasePen",
-    "stampPen",
-    "penDown",
-    "penUp",
-    "setPenColor",
-    "changePenEffect",
-    "setPenEffect",
-    "changePenSize",
-    "setPenSize",
-    "endThread"
-]
+CUSTOM_VALID_FUNCTIONS = []
 
 
 UNNECESSITY_CODES = {
@@ -258,6 +177,8 @@ def pylsp_lint(workspace: Workspace, document: Document) -> List[Dict]:
     List of dicts containing the diagnostics.
 
     """
+    for func in document._config.settings().get("apiData"):
+        CUSTOM_VALID_FUNCTIONS.append(func)
     settings = load_settings(workspace, document.path)
     checks = run_ruff_check(document=document, settings=settings)
     # Only get diagnostics for valid errors, not Patch function errors
