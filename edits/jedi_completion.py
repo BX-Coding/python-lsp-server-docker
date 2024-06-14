@@ -39,7 +39,7 @@ patchApi = [
         "name": "move",
         "opcode": "motion_movesteps",
         "parameters": ["steps"],
-        "exampleParameters": {"steps": 10},
+        "exampleParameters": {"steps": "PrimProxy.DEFAULT_STEPS"},
     },
     {
         "name": "goToXY",
@@ -551,11 +551,32 @@ def addPatchCompletes(list):
         funcName = f"{name}({', '.join(parameters)})"
 
         list.append(CustomCompletion(name=funcName, type="function", ))
-    
+
+def addStateCompletes(list,document):
+    try:
+        targets = document._config.settings().get("targets")
+        backdrops = document._config.settings().get("backdrops")
+        costumes = document._config.settings().get("costumes")
+        sounds = document._config.settings().get("sounds")
+        messages = document._config.settings().get("messages")
+        for t in targets:
+            list.append(CustomCompletion(name=t, type="param"))
+        for b in backdrops:
+            list.append(CustomCompletion(name=b, type="param"))
+        for c in costumes:
+            list.append(CustomCompletion(name=c, type="param"))
+        for s in sounds:
+            list.append(CustomCompletion(name=s, type="param"))
+        for m in messages:
+            list.append(CustomCompletion(name=m, type="param"))
+    except:
+        print("State not initialized")
+        
 @hookimpl
 def pylsp_completions(config, document, position):
     """Get formatted completions for current code position"""
     settings = config.plugin_settings("jedi_completion", document_path=document.path)
+   
     resolve_eagerly = settings.get("eager", False)
     code_position = _utils.position_to_jedi_linecolumn(document, position)
 
@@ -563,6 +584,7 @@ def pylsp_completions(config, document, position):
 
     completions = document.jedi_script(use_document_path=True).complete(**code_position)
     addPatchCompletes(completions)
+    addStateCompletes(completions,document)
     
     if not completions:
         return None
@@ -633,7 +655,7 @@ def pylsp_completions(config, document, position):
                 completion_dict = _format_completion(
                     c,
                     markup_kind=preferred_markup_kind,
-                    include_params=False,
+                    include_params=True,
                     resolve=resolve_eagerly,
                     resolve_label_or_snippet=(i < max_to_resolve),
                     snippet_support=snippet_support,
@@ -661,6 +683,7 @@ def pylsp_completions(config, document, position):
 
 @hookimpl
 def pylsp_completion_item_resolve(config, completion_item, document):
+    print("Unique string",completion_item)
     """Resolve formatted completion for given non-resolved completion"""
     shared_data = document.shared_data["LAST_JEDI_COMPLETIONS"].get(
         completion_item["label"]

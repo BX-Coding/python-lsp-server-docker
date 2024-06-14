@@ -230,8 +230,14 @@ class PyflakesDiagnosticReport:
 
             #Now parse the syntax tree to get all customly defined variable/function names in the source code
             root = ast.parse(self.source)
-            funs = list({node.value.func.id: None for node in ast.walk(root) if isinstance(node, ast.Expr)})
-            vars = list({node.id: None for node in ast.walk(root) if isinstance(node, ast.Name)})
+            funs = list({
+                node.value.func.id: None for node in ast.walk(root)
+                if isinstance(node, ast.Expr) and hasattr(node, 'value') and isinstance(node.value, ast.Call) and hasattr(node.value.func, 'id')
+            })
+            vars = list({
+                node.id: None for node in ast.walk(root)
+                if isinstance(node, ast.Name)
+            })
             vars = [i for i in vars if not i in set(funs)]
 
             #Then check if unassigned/undefined

@@ -13,7 +13,7 @@ function App() {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const serverUri = "ws://localhost:8080";
+    const serverUri = "ws://localhost:8000";
 
     wsRef.current = new WebSocket(serverUri);
 
