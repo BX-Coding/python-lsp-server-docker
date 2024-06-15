@@ -38,10 +38,16 @@ class CustomCompletion:
     def __init__(self, name, type):
         self.full_name = ""
         self.name = name
-        self.type = type
         self._docstring = ""
         self._signatures = []
-
+        self.type = type
+        if type == "function":
+            self.kind = 3
+        elif type == "var":
+            self.kind = 6
+        else:
+            self.kind=6
+        
     def docstring(self):
         return self._docstring
 
@@ -52,7 +58,7 @@ def addPatchCompletes(completion_list, patchApi):
     for func_name, details in patchApi.items():
         params = ', '.join(details['parameters'])
         completion_name = f"{func_name}({params})"
-        completion_list.append(CustomCompletion(name=completion_name, type="param"))
+        completion_list.append(CustomCompletion(name=completion_name, type="function"))
 
 def addStateCompletes(list,document):
     try:
@@ -62,15 +68,15 @@ def addStateCompletes(list,document):
         sounds = document._config.settings().get("sounds")
         messages = document._config.settings().get("messages")
         for t in targets:
-            list.append(CustomCompletion(name=t, type="param"))
+            list.append(CustomCompletion(name=t, type="var"))
         for b in backdrops:
-            list.append(CustomCompletion(name=b, type="param"))
+            list.append(CustomCompletion(name=b, type="var"))
         for c in costumes:
-            list.append(CustomCompletion(name=c, type="param"))
+            list.append(CustomCompletion(name=c, type="var"))
         for s in sounds:
-            list.append(CustomCompletion(name=s, type="param"))
+            list.append(CustomCompletion(name=s, type="var"))
         for m in messages:
-            list.append(CustomCompletion(name=m, type="param"))
+            list.append(CustomCompletion(name=m, type="var"))
     except:
         print("State not initialized")
         
