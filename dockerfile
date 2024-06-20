@@ -14,8 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY edits/jedi_completion.py /usr/local/lib/python3.11/site-packages/pylsp/plugins/jedi_completion.py
 COPY edits/pyflakes_lint.py /usr/local/lib/python3.11/site-packages/pylsp/plugins/pyflakes_lint.py
 COPY edits/plugin.py /usr/local/lib/python3.11/site-packages/pylsp_ruff/plugin.py
-
-WORKDIR /usr/local/lib/python3.11/site-packages/pylsp_ruff
+COPY edits/workspace.py /usr/local/lib/python3.11/site-packages/pylsp/workspace.py
 
 # Expose port 8000 for WebSocket
 EXPOSE 8080

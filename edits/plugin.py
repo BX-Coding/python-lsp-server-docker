@@ -47,88 +47,7 @@ NOQA_REGEX = re.compile(
 )
 
 #list of valid Patch functions to ignore
-CUSTOM_VALID_FUNCTIONS = [
-    "move",
-    "goToXY",
-    "goTo",
-    "turnRight",
-    "turnLeft",
-    "pointInDirection",
-    "pointTowards",
-    "glide",
-    "glideTo",
-    "ifOnEdgeBounce",
-    "setRotationStyle",
-    "changeX",
-    "setX",
-    "changeY",
-    "setY",
-    "getX",
-    "getY",
-    "getDirection",
-    "say",
-    "sayFor",
-    "think",
-    "thinkFor",
-    "show",
-    "hide",
-    "setCostumeTo",
-    "setBackdropTo",
-    "setBackdropToAndWait",
-    "nextCostume",
-    "nextBackdrop",
-    "changeGraphicEffectBy",
-    "setGraphicEffectTo",
-    "clearGraphicEffects",
-    "changeSizeBy",
-    "setSizeTo",
-    "setLayerTo",
-    "changeLayerBy",
-    "getSize",
-    "getCostume",
-    "getBackdrop",
-    "playSound",
-    "playSoundUntilDone",
-    "stopAllSounds",
-    "setSoundEffectTo",
-    "changeSoundEffectBy",
-    "clearSoundEffects",
-    "setVolumeTo",
-    "changeVolumeBy",
-    "getVolume",
-    "broadcast",
-    "broadcastAndWait",
-    "isTouching",
-    "isTouchingColor",
-    "isColorTouchingColor",
-    "distanceTo",
-    "getTimer",
-    "resetTimer",
-    "getAttributeOf",
-    "getMouseX",
-    "getMouseY",
-    "isMouseDown",
-    "isKeyPressed",
-    "current",
-    "daysSince2000",
-    "getLoudness",
-    "getUsername",
-    "ask",
-    "wait",
-    "stop",
-    "createClone",
-    "deleteClone",
-    "erasePen",
-    "stampPen",
-    "penDown",
-    "penUp",
-    "setPenColor",
-    "changePenEffect",
-    "setPenEffect",
-    "changePenSize",
-    "setPenSize",
-    "endThread"
-]
+CUSTOM_VALID_FUNCTIONS = []
 
 
 UNNECESSITY_CODES = {
@@ -241,6 +160,25 @@ def pylsp_format_document(workspace: Workspace, document: Document) -> Generator
 
     outcome.force_result(converter.unstructure([text_edit]))
 
+def addStateValidations(list,document):
+    try:
+        targets = document._config.settings().get("targets")
+        backdrops = document._config.settings().get("backdrops")
+        costumes = document._config.settings().get("costumes")
+        sounds = document._config.settings().get("sounds")
+        messages = document._config.settings().get("messages")
+        for t in targets:
+            list.append(t)
+        for b in backdrops:
+            list.append(b)
+        for c in costumes:
+            list.append(c)
+        for s in sounds:
+            list.append(s)
+        for m in messages:
+            list.append(m)
+    except:
+        print("State not initialized")
 
 @hookimpl
 def pylsp_lint(workspace: Workspace, document: Document) -> List[Dict]:
@@ -258,6 +196,14 @@ def pylsp_lint(workspace: Workspace, document: Document) -> List[Dict]:
     List of dicts containing the diagnostics.
 
     """
+    try:
+        for func in document._config.settings().get("apiData"):
+            CUSTOM_VALID_FUNCTIONS.append(func)
+    except:
+        print("Api Data not yet loaded")
+
+    addStateValidations(CUSTOM_VALID_FUNCTIONS,document)
+    
     settings = load_settings(workspace, document.path)
     checks = run_ruff_check(document=document, settings=settings)
     # Only get diagnostics for valid errors, not Patch function errors

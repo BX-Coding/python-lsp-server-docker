@@ -26,88 +26,7 @@ PYFLAKES_ERROR_MESSAGES = (
 )
 
 # List of Patch functions  
-CUSTOM_VALID_FUNCTIONS = [
-    "move",
-    "goToXY",
-    "goTo",
-    "turnRight",
-    "turnLeft",
-    "pointInDirection",
-    "pointTowards",
-    "glide",
-    "glideTo",
-    "ifOnEdgeBounce",
-    "setRotationStyle",
-    "changeX",
-    "setX",
-    "changeY",
-    "setY",
-    "getX",
-    "getY",
-    "getDirection",
-    "say",
-    "sayFor",
-    "think",
-    "thinkFor",
-    "show",
-    "hide",
-    "setCostumeTo",
-    "setBackdropTo",
-    "setBackdropToAndWait",
-    "nextCostume",
-    "nextBackdrop",
-    "changeGraphicEffectBy",
-    "setGraphicEffectTo",
-    "clearGraphicEffects",
-    "changeSizeBy",
-    "setSizeTo",
-    "setLayerTo",
-    "changeLayerBy",
-    "getSize",
-    "getCostume",
-    "getBackdrop",
-    "playSound",
-    "playSoundUntilDone",
-    "stopAllSounds",
-    "setSoundEffectTo",
-    "changeSoundEffectBy",
-    "clearSoundEffects",
-    "setVolumeTo",
-    "changeVolumeBy",
-    "getVolume",
-    "broadcast",
-    "broadcastAndWait",
-    "isTouching",
-    "isTouchingColor",
-    "isColorTouchingColor",
-    "distanceTo",
-    "getTimer",
-    "resetTimer",
-    "getAttributeOf",
-    "getMouseX",
-    "getMouseY",
-    "isMouseDown",
-    "isKeyPressed",
-    "current",
-    "daysSince2000",
-    "getLoudness",
-    "getUsername",
-    "ask",
-    "wait",
-    "stop",
-    "createClone",
-    "deleteClone",
-    "erasePen",
-    "stampPen",
-    "penDown",
-    "penUp",
-    "setPenColor",
-    "changePenEffect",
-    "setPenEffect",
-    "changePenSize",
-    "setPenSize",
-    "endThread"
-]
+CUSTOM_VALID_FUNCTIONS = []
 
 
 # Gets all Python key words and functions
@@ -116,8 +35,34 @@ PYTHON_KEY_WORDS = [name for name, obj in vars(builtins).items()
 PYTHON_FUNCTIONS =  [name for name, obj in vars(builtins).items() 
                           if isinstance(obj, types.BuiltinFunctionType)]
 
+def addStateValidations(list,document):
+    try:
+        targets = document._config.settings().get("targets")
+        backdrops = document._config.settings().get("backdrops")
+        costumes = document._config.settings().get("costumes")
+        sounds = document._config.settings().get("sounds")
+        messages = document._config.settings().get("messages")
+        for t in targets:
+            list.append(t)
+        for b in backdrops:
+            list.append(b)
+        for c in costumes:
+            list.append(c)
+        for s in sounds:
+            list.append(s)
+        for m in messages:
+            list.append(m)
+    except:
+        print("State not initialized")
+
 @hookimpl
 def pylsp_lint(workspace, document):
+    try:
+        for func in document._config.settings().get("apiData"):
+            CUSTOM_VALID_FUNCTIONS.append(func)
+    except:
+        print("Api Data not yet loaded")
+    addStateValidations(CUSTOM_VALID_FUNCTIONS,document)
     with workspace.report_progress("lint: pyflakes"):
         reporter = PyflakesDiagnosticReport(document.lines)
         pyflakes_api.check(
@@ -230,8 +175,14 @@ class PyflakesDiagnosticReport:
 
             #Now parse the syntax tree to get all customly defined variable/function names in the source code
             root = ast.parse(self.source)
-            funs = list({node.value.func.id: None for node in ast.walk(root) if isinstance(node, ast.Expr)})
-            vars = list({node.id: None for node in ast.walk(root) if isinstance(node, ast.Name)})
+            funs = list({
+                node.value.func.id: None for node in ast.walk(root)
+                if isinstance(node, ast.Expr) and hasattr(node, 'value') and isinstance(node.value, ast.Call) and hasattr(node.value.func, 'id')
+            })
+            vars = list({
+                node.id: None for node in ast.walk(root)
+                if isinstance(node, ast.Name)
+            })
             vars = [i for i in vars if not i in set(funs)]
 
             #Then check if unassigned/undefined

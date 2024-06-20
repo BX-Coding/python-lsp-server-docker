@@ -34,535 +34,65 @@ _IMPORTS = ("import_name", "import_from")
 # Types of parso node for errors
 _ERRORS = ("error_node",)
 
-patchApi = [
-    {
-        "name": "move",
-        "opcode": "motion_movesteps",
-        "parameters": ["steps"],
-        "exampleParameters": {"steps": 10},
-    },
-    {
-        "name": "goToXY",
-        "opcode": "motion_gotoxy",
-        "parameters": ["x", "y"],
-        "exampleParameters": {"x": "PrimProxy.DEFAULT_X", "y": "PrimProxy.DEFAULT_Y"},
-    },
-    {
-        "name": "goTo",
-        "opcode": "motion_goto",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.LOCATION_OPTIONS"},
-    },
-    {
-        "name": "turnRight",
-        "opcode": "motion_turnright",
-        "parameters": ["degrees"],
-        "exampleParameters": {"degrees": "PrimProxy.DEFAULT_DIRECTION"},
-    },
-    {
-        "name": "turnLeft",
-        "opcode": "motion_turnleft",
-        "parameters": ["degrees"],
-        "exampleParameters": {"degrees": "PrimProxy.DEFAULT_DIRECTION"},
-    },
-    {
-        "name": "pointInDirection",
-        "opcode": "motion_pointindirection",
-        "parameters": ["degrees"],
-        "exampleParameters": {"degrees": "PrimProxy.DEFAULT_DIRECTION"},
-    },
-    {
-        "name": "pointTowards",
-        "opcode": "motion_pointtowards",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.LOCATION_OPTIONS"},
-    },
-    {
-        "name": "glide",
-        "opcode": "motion_glidesecstoxy",
-        "parameters": ["seconds", "x", "y"],
-        "exampleParameters": {
-            "seconds": "PrimProxy.DEFAULT_SECONDS",
-            "x": "PrimProxy.DEFAULT_X",
-            "y": "PrimProxy.DEFAULT_Y",
-        },
-    },
-    {
-        "name": "glideTo",
-        "opcode": "motion_glideto",
-        "parameters": ["seconds", "name"],
-        "exampleParameters": {
-            "seconds": "PrimProxy.DEFAULT_SECONDS",
-            "name": "PrimProxy.LOCATION_OPTIONS",
-        },
-    },
-    {
-        "name": "ifOnEdgeBounce",
-        "opcode": "motion_ifonedgebounce",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "setRotationStyle",
-        "opcode": "motion_setrotationstyle",
-        "parameters": ["style"],
-        "exampleParameters": {"style": "Scratch3MotionBlocks.ROTATION_STYLES"},
-    },
-    {
-        "name": "changeX",
-        "opcode": "motion_changexby",
-        "parameters": ["x"],
-        "exampleParameters": {"x": "PrimProxy.DEFAULT_CHANGE"},
-    },
-    {
-        "name": "setX",
-        "opcode": "motion_setx",
-        "parameters": ["x"],
-        "exampleParameters": {"x": "PrimProxy.DEFAULT_X"},
-    },
-    {
-        "name": "changeY",
-        "opcode": "motion_changeyby",
-        "parameters": ["y"],
-        "exampleParameters": {"y": "PrimProxy.DEFAULT_CHANGE"},
-    },
-    {
-        "name": "setY",
-        "opcode": "motion_sety",
-        "parameters": ["y"],
-        "exampleParameters": {"y": "PrimProxy.DEFAULT_Y"},
-    },
-    {
-        "name": "getX",
-        "opcode": "motion_xposition",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "getY",
-        "opcode": "motion_yposition",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "getDirection",
-        "opcode": "motion_direction",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "say",
-        "opcode": "looks_say",
-        "parameters": ["message"],
-        "exampleParameters": {"message": "PrimProxy.DEFAULT_MESSAGE"},
-    },
-    {
-        "name": "sayFor",
-        "opcode": "looks_sayforsecs",
-        "parameters": ["message", "secs"],
-        "exampleParameters": {"message": "PrimProxy.DEFAULT_MESSAGE"},
-    },
-    {
-        "name": "think",
-        "opcode": "looks_think",
-        "parameters": ["message"],
-        "exampleParameters": {"message": "PrimProxy.DEFAULT_MESSAGE"},
-    },
-    {
-        "name": "thinkFor",
-        "opcode": "looks_thinkforsecs",
-        "parameters": ["message", "secs"],
-        "exampleParameters": {"message": "PrimProxy.DEFAULT_MESSAGE"},
-    },
-    {
-        "name": "show",
-        "opcode": "looks_show",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "hide",
-        "opcode": "looks_hide",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "setCostumeTo",
-        "opcode": "looks_switchcostumeto",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.COSTUME_NAMES"},
-    },
-    {
-        "name": "setBackdropTo",
-        "opcode": "looks_switchbackdropto",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.BACKDROP_NAMES"},
-    },
-    {
-        "name": "setBackdropToAndWait",
-        "opcode": "looks_switchbackdroptoandwait",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.BACKDROP_NAMES"},
-    },
-    {
-        "name": "nextCostume",
-        "opcode": "looks_nextcostume",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "nextBackdrop",
-        "opcode": "looks_nextbackdrop",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "changeGraphicEffectBy",
-        "opcode": "looks_changeeffectby",
-        "parameters": ["effect", "change"],
-        "exampleParameters": {
-            "effect": "Scratch3LooksBlocks.EFFECT_LIST",
-            "change": "PrimProxy.DEFAULT_CHANGE",
-        },
-    },
-    {
-        "name": "setGraphicEffectTo",
-        "opcode": "looks_seteffectto",
-        "parameters": ["effect", "value"],
-        "exampleParameters": {
-            "effect": "Scratch3LooksBlocks.EFFECT_LIST",
-            "value": "PrimProxy.DEFAULT_EFFECT",
-        },
-    },
-    {
-        "name": "clearGraphicEffects",
-        "opcode": "looks_cleargraphiceffects",
-        "parameters": [],
-        "exampleParameters": {},
-    },
-    {
-        "name": "changeSizeBy",
-        "opcode": "looks_changesizeby",
-        "parameters": ["change"],
-        "exampleParameters": {"change": "PrimProxy.DEFAULT_CHANGE"},
-    },
-    {
-        "name": "setSizeTo",
-        "opcode": "looks_setsizeto",
-        "parameters": ["size"],
-        "exampleParameters": {"size": "PrimProxy.DEFAULT_SIZE"},
-    },
-    {
-        "name": "setLayerTo",
-        "opcode": "looks_gotofrontback",
-        "parameters": ["layer"],
-        "exampleParameters": {"layer": ["front", "back"]}
-    },
-    {
-        "name": "changeLayerBy",
-        "opcode": "looks_goforwardbackwardlayers",
-        "parameters": ["direction", "change"],
-        "exampleParameters": {"direction": "forward", "change": 1}
-    },
-    {
-        "name": "getSize",
-        "opcode": "looks_size",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getCostume",
-        "opcode": "looks_costumenumbername",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getBackdrop",
-        "opcode": "looks_backdropnumbername",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "playSound",
-        "opcode": "sound_play",
-        "parameters": ["soundName"],
-        "exampleParameters": {"soundName": "PrimProxy.SOUND_NAMES"}
-    },
-    {
-        "name": "playSoundUntilDone",
-        "opcode": "sound_playuntildone",
-        "parameters": ["sound name"],
-        "exampleParameters": {"soundName": "PrimProxy.SOUND_NAMES"}
-    },
-    {
-        "name": "stopAllSounds",
-        "opcode": "sound_stopallsounds",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "setSoundEffectTo",
-        "opcode": "sound_seteffectto",
-        "parameters": ["effect", "value"],
-        "exampleParameters": {"effect": "Scratch3SoundBlocks.EFFECT_LIST", "value": "PrimProxy.DEFAULT_EFFECT"}
-    },
-    {
-        "name": "changeSoundEffectBy",
-        "opcode": "sound_changeeffectby",
-        "parameters": ["effect", "change"],
-        "exampleParameters": {"effect": "Scratch3SoundBlocks.EFFECT_LIST", "change": "PrimProxy.DEFAULT_CHANGE"}
-    },
-    {
-        "name": "clearSoundEffects",
-        "opcode": "sound_cleareffects",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "setVolumeTo",
-        "opcode": "sound_setvolumeto",
-        "parameters": ["volume"],
-        "exampleParameters": {"volume": "PrimProxy.DEFAULT_VOLUME"}
-    },
-    {
-        "name": "changeVolumeBy",
-        "opcode": "sound_changevolumeby",
-        "parameters": ["change"],
-        "exampleParameters": {"change": "PrimProxy.DEFAULT_CHANGE"}
-    },
-    {
-        "name": "getVolume",
-        "opcode": "sound_volume",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "broadcast",
-        "opcode": "event_broadcast",
-        "parameters": ["message"],
-        "exampleParameters": {"message": "PrimProxy.MESSAGE_NAMES"}
-    },
-    {
-        "name": "broadcastAndWait",
-        "opcode": "event_broadcastandwait",
-        "parameters": ["message"],
-        "exampleParameters": {"message": "PrimProxy.MESSAGE_NAMES"}
-    },
-    {
-        "name": "isTouching",
-        "opcode": "sensing_touchingobject",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.TOUCHING_OPTIONS"}
-    },
-    {
-        "name": "isTouchingColor",
-        "opcode": "sensing_touchingcolor",
-        "parameters": ["color"],
-        "exampleParameters": {"color": "PrimProxy.DEFAULT_EFFECT"}
-    },
-    {
-        "name": "isColorTouchingColor",
-        "opcode": "sensing_coloristouchingcolor",
-        "parameters": ["color1", "color2"],
-        "exampleParameters": {"color1": "PrimProxy.DEFAULT_EFFECT", "color2": "PrimProxy.DEFAULT_EFFECT"}
-    },
-    {
-        "name": "distanceTo",
-        "opcode": "sensing_distanceto",
-        "parameters": ["name"],
-        "exampleParameters": {"name": "PrimProxy.LOCATION_OPTIONS"}
-    },
-    {
-        "name": "getTimer",
-        "opcode": "sensing_timer",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "resetTimer",
-        "opcode": "sensing_resettimer",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getAttributeOf",
-        "opcode": "sensing_of",
-        "parameters": ["object", "property"],
-        "exampleParameters": {"object": "PrimProxy.TARGET_NAMES", "property": "x position"}
-    },
-    {
-        "name": "getMouseX",
-        "opcode": "sensing_mousex",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getMouseY",
-        "opcode": "sensing_mousey",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "isMouseDown",
-        "opcode": "sensing_mousedown",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "isKeyPressed",
-        "opcode": "sensing_keypressed",
-        "parameters": ["key"],
-        "exampleParameters": {"key": "PrimProxy.KEY_DOWN_OPTIONS"}
-    },
-    {
-        "name": "current",
-        "opcode": "sensing_current",
-        "parameters": ["timeIncrement"],
-        "exampleParameters": {"timeIncrement": "Scratch3SensingBlocks.CURRENT_INCREMENT_OPTIONS"}
-    },
-    {
-        "name": "daysSince2000",
-        "opcode": "sensing_dayssince2000",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getLoudness",
-        "opcode": "sensing_loudness",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "getUsername",
-        "opcode": "sensing_username",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "ask",
-        "opcode": "sensing_askandwait",
-        "parameters": ["question"],
-        "exampleParameters": {"question": "PrimProxy.DEFAULT_QUESTION"}
-    },
-    {
-        "name": "wait",
-        "opcode": "control_wait",
-        "parameters": ["seconds"],
-        "exampleParameters": {"seconds": "PrimProxy.DEFAULT_SECONDS"}
-    },
-    {
-        "name": "stop",
-        "opcode": "control_stop",
-        "parameters": ["option"],
-        "exampleParameters": {"option": "Scratch3ControlBlocks.STOP_OPTIONS"}
-    },
-    {
-        "name": "createClone",
-        "opcode": "control_create_clone_of",
-        "parameters": ["option"],
-        "exampleParameters": {"option": "PrimProxy.CLONE_OPTIONS"}
-    },
-    {
-        "name": "deleteClone",
-        "opcode": "control_delete_this_clone",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "erasePen",
-        "opcode": "pen_clear",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "stampPen",
-        "opcode": "pen_stamp",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "penDown",
-        "opcode": "pen_pendown",
-        "parameters": [],
-    },
-    {
-        "name": "penUp",
-        "opcode": "pen_penup",
-        "parameters": [],
-        "exampleParameters": {}
-    },
-    {
-        "name": "setPenColor",
-        "opcode": "pen_setpencolortocolor",
-        "parameters": ["color"],
-        "exampleParameters": {"color": "PrimProxy.DEFAULT_EFFECT"}
-    },
-    {
-        "name": "changePenEffect",
-        "opcode": "pen_changepencolorparamby",
-        "parameters": ["effect", "change"],
-        "exampleParameters": {"effect": "Scratch3PenBlocks.PEN_EFFECT_LIST", "change": "PrimProxy.DEFAULT_CHANGE"}
-    },
-    {
-        "name": "setPenEffect",
-        "opcode": "pen_setpencolorparamto",
-        "parameters": ["effect", "value"],
-        "exampleParameters": {"effect": "Scratch3PenBlocks.PEN_EFFECT_LIST", "value": "PrimProxy.DEFAULT_EFFECT"}
-    },
-    {
-        "name": "changePenSize",
-        "opcode": "pen_changepensizeby",
-        "parameters": ["change"],
-        "exampleParameters": {"change": "PrimProxy.DEFAULT_CHANGE"}
-    },
-    {
-        "name": "setPenSize",
-        "opcode": "pen_setpensizeto",
-        "parameters": ["size"],
-        "exampleParameters": {"size": "PrimProxy.DEFAULT_SIZE"}
-    },
-    {
-        "name": "endThread",
-        "opcode": "core_endthread",
-        "parameters": [],
-        "exampleParameters": {}
-    }
-]
-
 class CustomCompletion:
     def __init__(self, name, type):
         self.full_name = ""
         self.name = name
-        self.type = type
         self._docstring = ""
         self._signatures = []
-
+        self.type = type
+        if type == "function":
+            self.kind = 3
+        elif type == "var":
+            self.kind = 6
+        else:
+            self.kind=6
+        
     def docstring(self):
         return self._docstring
 
     def get_signatures(self):
         return self._signatures
 
-def addPatchCompletes(list):
-    """Returns a list of custom completion items"""
-    for f in patchApi:
-        name = f["name"]
-        parameters = f["parameters"]
-        funcName = f"{name}({', '.join(parameters)})"
+def addPatchCompletes(completion_list, patchApi):
+    for func_name, details in patchApi.items():
+        params = ', '.join(details['parameters'])
+        completion_name = f"{func_name}({params})"
+        completion_list.append(CustomCompletion(name=completion_name, type="function"))
 
-        list.append(CustomCompletion(name=funcName, type="function", ))
-    
+def addStateCompletes(list,document):
+    try:
+        targets = document._config.settings().get("targets")
+        backdrops = document._config.settings().get("backdrops")
+        costumes = document._config.settings().get("costumes")
+        sounds = document._config.settings().get("sounds")
+        messages = document._config.settings().get("messages")
+        for t in targets:
+            list.append(CustomCompletion(name=t, type="var"))
+        for b in backdrops:
+            list.append(CustomCompletion(name=b, type="var"))
+        for c in costumes:
+            list.append(CustomCompletion(name=c, type="var"))
+        for s in sounds:
+            list.append(CustomCompletion(name=s, type="var"))
+        for m in messages:
+            list.append(CustomCompletion(name=m, type="var"))
+    except:
+        print("State not initialized")
+        
 @hookimpl
 def pylsp_completions(config, document, position):
     """Get formatted completions for current code position"""
     settings = config.plugin_settings("jedi_completion", document_path=document.path)
+   
     resolve_eagerly = settings.get("eager", False)
     code_position = _utils.position_to_jedi_linecolumn(document, position)
 
     code_position["fuzzy"] = settings.get("fuzzy", False)
 
     completions = document.jedi_script(use_document_path=True).complete(**code_position)
-    addPatchCompletes(completions)
+    addPatchCompletes(completions,document._config.settings().get("apiData"))
+    addStateCompletes(completions,document)
     
     if not completions:
         return None
@@ -633,7 +163,7 @@ def pylsp_completions(config, document, position):
                 completion_dict = _format_completion(
                     c,
                     markup_kind=preferred_markup_kind,
-                    include_params=False,
+                    include_params=True,
                     resolve=resolve_eagerly,
                     resolve_label_or_snippet=(i < max_to_resolve),
                     snippet_support=snippet_support,
